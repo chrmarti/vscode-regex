@@ -9,7 +9,18 @@ export function activate(context: vscode.ExtensionContext) {
 
     let previewUri = vscode.Uri.parse('regex-preview://authority/regex-preview');
 
+    interface RegExMatch {
+
+        document: vscode.TextDocument;
+
+        regEx: RegExp;
+
+        range: vscode.Range;
+
+    }
+
     class TextDocumentContentProvider implements vscode.TextDocumentContentProvider {
+
         private _onDidChange = new vscode.EventEmitter<vscode.Uri>();
 
         public provideTextDocumentContent(uri: vscode.Uri): string {
@@ -33,17 +44,47 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         private extractSnippet(): string {
-            let editor = vscode.window.activeTextEditor;
-            let text = editor.document.getText();
-            let selStart = editor.document.offsetAt(editor.selection.anchor);
-            let propStart = text.lastIndexOf('/', selStart - 1);
-            let propEnd = text.indexOf('/', selStart);
+            const editor = vscode.window.activeTextEditor;
+            const found = this.findRegExAtCaret(editor);
 
-            if (propStart === -1 || propEnd === -1) {
+            if (!found) {
                 return this.errorSnippet("Cannot find a regex.");
-            } else {
-                return this.snippet(editor.document, propStart, propEnd);
             }
+
+            return this.snippet(found);
+        }
+
+        private findRegExAtCaret(editor: vscode.TextEditor): RegExMatch {
+            const anchor = editor.selection.anchor;
+            const text = editor.document.lineAt(anchor).text;
+
+            let start = text.lastIndexOf('/', anchor.character);
+            if (start === -1) {
+                return;
+            }
+            
+            let end = text.indexOf('/', start === anchor.character ? anchor.character + 1 : anchor.character);
+            if (end === -1) {
+                end = start;
+                start = text.lastIndexOf('/', end - 1);
+                if (start === -1) {
+                    return;
+                }
+            }
+
+            const flagsRegEx = /[gimuy]*/y;
+            flagsRegEx.lastIndex = end + 1;
+            const flags = flagsRegEx.exec(text)[0];
+            const all = end + flags.length + 1;
+            if (anchor.character > all) {
+                return;
+            }
+
+            return {
+                document: editor.document,
+                regEx: new RegExp(text.slice(start + 1, end), flags),
+                range: new vscode.Range(anchor.line, start, anchor.line, all)
+            };
         }
 
         private errorSnippet(error: string): string {
@@ -53,29 +94,24 @@ export function activate(context: vscode.ExtensionContext) {
                 </body>`;
         }
 
-        private snippet(document: vscode.TextDocument, propStart: number, propEnd: number): string {
-            const documentText = document.getText();
-            const flagsRegEx = /[gimuy]*/y;
-            flagsRegEx.lastIndex = propEnd + 1;
-            const flags = flagsRegEx.exec(documentText)[0];
-            const regex = new RegExp(documentText.slice(propStart + 1, propEnd), flags);
+        private snippet(match: RegExMatch): string {
             const text = "Lorem ipsum dolor sit amet, mi et mauris nec ac luctus lorem, proin leo nulla integer metus vestibulum lobortis, eget";
-            const highlightedText = text.replace(regex, "<span class='highlight'>$&</span>");
+            const highlightedText = text.replace(match.regEx, "<span class='highlight'>$&</span>");
             return `<style>
                     .highlight {
                         background: yellow;
                     }
                 </style>
                 <body>
-                    <div>Preview for the matches of the current <a href="${encodeURI('command:extension.revealRegExRule?' + JSON.stringify([document.uri, propStart, propEnd]))}">RegEx</a></dev>
+                    <div>Preview for the matches of the current <a href="${encodeURI('command:extension.revealRegExRule?' + JSON.stringify([match.document.uri, match.document.offsetAt(match.range.start), match.document.offsetAt(match.range.end)]))}">RegEx</a></dev>
                     <hr>
                     <div>${highlightedText}</div>
                 </body>`;
         }
     }
 
-    let provider = new TextDocumentContentProvider();
-    let registration = vscode.workspace.registerTextDocumentContentProvider('regex-preview', provider);
+    const provider = new TextDocumentContentProvider();
+    const registration = vscode.workspace.registerTextDocumentContentProvider('regex-preview', provider);
 
     vscode.workspace.onDidChangeTextDocument(e => {
         if (e.document === vscode.window.activeTextEditor.document) {
@@ -96,14 +132,14 @@ export function activate(context: vscode.ExtensionContext) {
         });
     }));
 
-    let highlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(200,200,200,.35)' });
+    const highlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(200,200,200,.35)' });
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.revealRegExRule', (uri: vscode.Uri, propStart: number, propEnd: number) => {
 
-        for (let editor of vscode.window.visibleTextEditors) {
+        for (const editor of vscode.window.visibleTextEditors) {
             if (editor.document.uri.toString() === uri.toString()) {
-                let start = editor.document.positionAt(propStart);
-                let end = editor.document.positionAt(propEnd + 1);
+                const start = editor.document.positionAt(propStart);
+                const end = editor.document.positionAt(propEnd);
 
                 editor.setDecorations(highlight, [new vscode.Range(start, end)]);
                 setTimeout(() => editor.setDecorations(highlight, []), 1500);
