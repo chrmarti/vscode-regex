@@ -18,6 +18,12 @@
         "commands": [{
             "command": "extension.showRegExPreview",
             "title": "Show Regex Preview"
+        }],
+        "keybindings": [{
+            "command": "extension.showRegExPreview",
+            "key": "ctrl+shift+m",
+            "mac": "cmd+shift+m",
+            "when": "editorTextFocus"
         }]
     },
     "scripts": {
