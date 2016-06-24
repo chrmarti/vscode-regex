@@ -12,16 +12,6 @@ export function activate(context: vscode.ExtensionContext) {
     const previewUri = vscode.Uri.parse('regex-preview://authority/regex-preview');
     const regexHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(100,100,100,.35)' });
     const matchHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(255,255,0,.35)' });
-    const text = `
-Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-sed do eiusmod tempor incididunt ut labore et dolore magna
-aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-ullamco laboris nisi ut aliquip ex ea commodo consequat.
-Duis aute irure dolor in reprehenderit in voluptate velit
-esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-occaecat cupidatat non proident, sunt in culpa qui officia
-deserunt mollit anim id est laborum.
-        `.trim();
 
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('extension.showRegexPreview', showRegexPreview));
 
@@ -32,37 +22,14 @@ deserunt mollit anim id est laborum.
             return;
         }
 
-        const filePath = path.join(rootPath, '.vscode/Regex Playground.md');
-        pathExists(filePath).then(exists => {
-
-            const uri = vscode.Uri.parse((exists ? 'file:' : 'untitled:') + encodeURI(filePath));
-            return vscode.workspace.openTextDocument(uri).then(document => {
-                return vscode.window.showTextDocument(document, originEditor.viewColumn + 1, true);
-            }).then(editor => {
-                if (!editor.document.getText().length) {
-                    return editor.edit(builder => {
-                        builder.insert(new vscode.Position(0, 0), text);
-                    }).then(() => editor);
-                }
-                return editor;
-            }).then(editor => {
-                new RegexMatchDecorator(editor);
-            });
-
+        const filePath = context.asAbsolutePath('User/Regex Playground.md')
+        const uri = vscode.Uri.parse(`file:${encodeURI(filePath)}`);
+        return vscode.workspace.openTextDocument(uri).then(document => {
+            return vscode.window.showTextDocument(document, originEditor.viewColumn + 1, true);
+        }).then(editor => {
+            new RegexMatchDecorator(editor);
         }).then(null, reason => {
             vscode.window.showErrorMessage(reason);
-        });
-    }
-
-    function pathExists(path: string) {
-        return new Promise<boolean>((resolve, reject) => {
-            fs.stat(path, err => {
-                if (err && err.code !== 'ENOENT') {
-                    reject(err);
-                } else {
-                    resolve(!err);
-                }
-            });
         });
     }
 
