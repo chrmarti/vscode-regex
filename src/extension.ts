@@ -145,34 +145,28 @@ deserunt mollit anim id est laborum.
     function findRegExAtCaret(editor: vscode.TextEditor): RegExMatch {
         const anchor = editor.selection.anchor;
         const text = editor.document.lineAt(anchor).text;
+        const regExRegEx = /\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*)/g;
 
-        let start = text.lastIndexOf('/', anchor.character);
-        if (start === -1) {
-            return;
-        }
-        
-        let end = text.indexOf('/', start === anchor.character ? anchor.character + 1 : anchor.character);
-        if (end === -1) {
-            end = start;
-            start = text.lastIndexOf('/', end - 1);
-            if (start === -1) {
-                return;
+        let match: RegExpExecArray;
+        while ((match = regExRegEx.exec(text)) && (match.index + match[0].length < anchor.character));
+        if (match && match.index <= anchor.character) {
+            const regEx = createRegEx(match[1], match[2]);
+            if (regEx) {
+                return {
+                    document: editor.document,
+                    regEx: regEx,
+                    range: new vscode.Range(anchor.line, match.index, anchor.line, match.index + match[0].length)
+                };
             }
         }
+    }
 
-        const flagsRegEx = /[gimuy]*/y;
-        flagsRegEx.lastIndex = end + 1;
-        const flags = flagsRegEx.exec(text)[0];
-        const all = end + flags.length + 1;
-        if (anchor.character > all) {
-            return;
-        }
-
-        return {
-            document: editor.document,
-            regEx: new RegExp(text.slice(start + 1, end), flags),
-            range: new vscode.Range(anchor.line, start, anchor.line, all)
-        };
+    function createRegEx(pattern: string, flags: string) {
+            try {
+                return new RegExp(pattern, flags);
+            } catch (e) {
+                // discard
+            }
     }
 
     function findMatches(regExMatch: RegExMatch, document: vscode.TextDocument) {
