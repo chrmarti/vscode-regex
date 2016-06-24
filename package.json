@@ -11,16 +11,16 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.showRegExPreview"
+        "onCommand:extension.showRegexPreview"
     ],
     "main": "./out/src/extension",
     "contributes": {
         "commands": [{
-            "command": "extension.showRegExPreview",
+            "command": "extension.showRegexPreview",
             "title": "Show Regex Preview"
         }],
         "keybindings": [{
-            "command": "extension.showRegExPreview",
+            "command": "extension.showRegexPreview",
             "key": "ctrl+shift+m",
             "mac": "cmd+shift+m",
             "when": "editorTextFocus"
