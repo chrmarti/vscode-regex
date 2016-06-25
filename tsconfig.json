@@ -5,6 +5,7 @@
         "outDir": "out",
         "noLib": true,
         "sourceMap": true,
+        "noImplicitAny": true,
         "rootDir": "."
     },
     "exclude": [

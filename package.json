@@ -11,14 +11,15 @@
         "Other"
     ],
     "activationEvents": [
+        "onLanguage:typescript",
         "onCommand:extension.showRegexPreview"
     ],
     "main": "./out/src/extension",
     "contributes": {
         "commands": [{
-            "command": "extension.showRegexPreview",
-            "title": "Show Regex Preview"
-        }],
+                "command": "extension.showRegexPreview",
+                "title": "Show Regex Preview"
+            }],
         "keybindings": [{
             "command": "extension.showRegexPreview",
             "key": "ctrl+shift+m",
