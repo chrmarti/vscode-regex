@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }
         return matches.map(match => new vscode.CodeLens(match.range, {
-            title: 'Matches...',
+            title: 'Show Matches...',
             command: 'extension.showRegexPreview',
             arguments: [ match ]
         }));
