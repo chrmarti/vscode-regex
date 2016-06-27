@@ -18,15 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerCodeLensProvider('typescript', { provideCodeLenses }));
 
     function provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken) {
-        const matches: RegexMatch[] = [];
-        for (let i = 0; i < document.lineCount; i++) {
-            const line = document.lineAt(i);
-            let match: RegExpExecArray;
-            regexRegex.lastIndex = 0;
-            while ((match = regexRegex.exec(line.text))) {
-                matches.push(createRegexMatch(document, i, match));
-            }
-        }
+        const matches = findRegexes(document);
         return matches.map(match => new vscode.CodeLens(match.range, {
             title: 'Show Matches...',
             command: 'extension.showRegexPreview',
@@ -146,6 +138,19 @@ export function activate(context: vscode.ExtensionContext) {
         if (match && match.index <= anchor.character) {
             return createRegexMatch(editor.document, anchor.line, match);
         }
+    }
+
+    function findRegexes(document: vscode.TextDocument) {
+        const matches: RegexMatch[] = [];
+        for (let i = 0; i < document.lineCount; i++) {
+            const line = document.lineAt(i);
+            let match: RegExpExecArray;
+            regexRegex.lastIndex = 0;
+            while ((match = regexRegex.exec(line.text))) {
+                matches.push(createRegexMatch(document, i, match));
+            }
+        }
+        return matches;
     }
 
     function createRegexMatch(document: vscode.TextDocument, line: number, match: RegExpExecArray) {
