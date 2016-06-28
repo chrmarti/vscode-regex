@@ -1,16 +1,21 @@
 {
-    "name": "regexpreview",
-    "displayName": "regexpreview",
-    "description": "A regex previewer.",
+    "name": "regex",
+    "displayName": "Regex Previewer",
+    "description": "Regex matches previewer for JavaScript and TypeScript in Visual Studio Code.",
     "version": "0.0.1",
     "publisher": "chrmarti",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/chrmarti/vscode-regex.git"
+    },
     "engines": {
         "vscode": "^1.2.1"
     },
     "categories": [
-        "Other"
+        "Productivity"
     ],
     "activationEvents": [
+        "onLanguage:javascript",
         "onLanguage:typescript",
         "onCommand:extension.showRegexPreview"
     ],
