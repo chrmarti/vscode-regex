@@ -2,7 +2,7 @@
     "name": "regex",
     "displayName": "Regex Previewer",
     "description": "Regex matches previewer for JavaScript and TypeScript in Visual Studio Code.",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "publisher": "chrmarti",
     "repository": {
         "type": "git",
