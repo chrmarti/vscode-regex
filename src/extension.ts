@@ -15,12 +15,15 @@ export function activate(context: vscode.ExtensionContext) {
 
     const matchesFilePath = context.asAbsolutePath('User/Regex Matches');
     const matchesFileUri = vscode.Uri.parse(`file:${encodeURI(matchesFilePath)}`);
+    const languages = ['javascript', 'typescript'];
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
 
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('extension.showRegexPreview', showRegexPreview));
 
-    context.subscriptions.push(vscode.languages.registerCodeLensProvider('typescript', { provideCodeLenses }));
+    languages.forEach(language => {
+        context.subscriptions.push(vscode.languages.registerCodeLensProvider(language, { provideCodeLenses }));
+    });
 
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(applyDecorator));
 
@@ -40,6 +43,11 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
         
+        // TODO: figure out why originEditor.document is sometimes a different object
+        if (initialRegexMatch.document.uri.toString() === originEditor.document.uri.toString()) {
+            initialRegexMatch.document = originEditor.document;
+        }
+
         return vscode.workspace.openTextDocument(matchesFileUri).then(document => {
             return vscode.window.showTextDocument(document, originEditor.viewColumn + 1, true);
         }).then(editor => {
@@ -57,7 +65,9 @@ export function activate(context: vscode.ExtensionContext) {
                 context.subscriptions.push(decorator);
                 decorators.set(matchEditor, decorator);
             }
-            decorator.apply(initialRegexEditor, initialRegexMatch);
+            if (initialRegexEditor || initialRegexMatch) {
+                decorator.apply(initialRegexEditor, initialRegexMatch);
+            }
         }
     }
 
@@ -150,7 +160,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     function findRegexEditor() {
         const activeEditor = vscode.window.activeTextEditor;
-        if (!activeEditor || activeEditor.document.languageId !== 'typescript') {
+        if (!activeEditor || languages.indexOf(activeEditor.document.languageId) === -1) {
             return null;
         }
         return activeEditor;        
