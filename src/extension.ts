@@ -60,12 +60,13 @@ export function activate(context: vscode.ExtensionContext) {
     function applyDecorator(matchEditor: vscode.TextEditor, initialRegexEditor?: vscode.TextEditor, initialRegexMatch?: RegexMatch) {
         if (matchEditor && matchEditor.document.uri.toString() === matchesFileUri.toString()) {
             let decorator = decorators.get(matchEditor);
-            if (!decorator) {
+            const newDecorator = !decorator;
+            if (newDecorator) {
                 decorator = new RegexMatchDecorator(matchEditor);
                 context.subscriptions.push(decorator);
                 decorators.set(matchEditor, decorator);
             }
-            if (initialRegexEditor || initialRegexMatch) {
+            if (newDecorator || initialRegexEditor || initialRegexMatch) {
                 decorator.apply(initialRegexEditor, initialRegexMatch);
             }
         }
