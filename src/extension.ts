@@ -9,12 +9,12 @@ import * as vscode from 'vscode';
 
 export function activate(context: vscode.ExtensionContext) {
 
-    const regexRegex = /\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*)/g;
+    const regexRegex = /(^|\s|[()={},:?;])(\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))(\s|[()={},:?;]|$)/g;
     const regexHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(100,100,100,.35)' });
     const matchHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(255,255,0,.35)' });
 
     const matchesFilePath = context.asAbsolutePath('User/Regex Matches');
-    const matchesFileUri = vscode.Uri.parse(`file:${encodeURI(matchesFilePath)}`);
+    const matchesFileUri = vscode.Uri.file(matchesFilePath);
     const languages = ['javascript', 'typescript'];
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
@@ -58,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     function applyDecorator(matchEditor: vscode.TextEditor, initialRegexEditor?: vscode.TextEditor, initialRegexMatch?: RegexMatch) {
-        if (matchEditor.document.uri.toString() === matchesFileUri.toString()) {
+        if (matchEditor && matchEditor.document.uri.toString() === matchesFileUri.toString()) {
             let decorator = decorators.get(matchEditor);
             if (!decorator) {
                 decorator = new RegexMatchDecorator(matchEditor);
@@ -172,8 +172,8 @@ export function activate(context: vscode.ExtensionContext) {
 
         let match: RegExpExecArray;
         regexRegex.lastIndex = 0;
-        while ((match = regexRegex.exec(text)) && (match.index + match[0].length < anchor.character));
-        if (match && match.index <= anchor.character) {
+        while ((match = regexRegex.exec(text)) && (match.index + match[1].length + match[2].length < anchor.character));
+        if (match && match.index + match[1].length <= anchor.character) {
             return createRegexMatch(editor.document, anchor.line, match);
         }
     }
@@ -192,12 +192,12 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     function createRegexMatch(document: vscode.TextDocument, line: number, match: RegExpExecArray) {
-        const regex = createRegex(match[1], match[2]);
+        const regex = createRegex(match[3], match[4]);
         if (regex) {
             return {
                 document: document,
                 regex: regex,
-                range: new vscode.Range(line, match.index, line, match.index + match[0].length)
+                range: new vscode.Range(line, match.index + match[1].length, line, match.index + match[1].length + match[2].length)
             };
         }
     }
