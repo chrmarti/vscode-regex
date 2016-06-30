@@ -30,7 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
     function provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken) {
         const matches = findRegexes(document);
         return matches.map(match => new vscode.CodeLens(match.range, {
-            title: 'Show Matches...',
+            title: 'Test Regex...',
             command: 'extension.showRegexPreview',
             arguments: [ match ]
         }));
