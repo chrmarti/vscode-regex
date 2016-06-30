@@ -8,6 +8,11 @@
         "type": "git",
         "url": "https://github.com/chrmarti/vscode-regex.git"
     },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/chrmarti/vscode-regex/issues"
+    },
+    "icon": "images/icon.png",
     "engines": {
         "vscode": "^1.2.1"
     },
