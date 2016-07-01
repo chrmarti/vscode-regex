@@ -22,20 +22,35 @@
     "activationEvents": [
         "onLanguage:javascript",
         "onLanguage:typescript",
-        "onCommand:extension.showRegexPreview"
+        "onCommand:extension.showRegexPreview",
+        "onCommand:extension.makeRegexPreview"
     ],
     "main": "./out/src/extension",
     "contributes": {
-        "commands": [{
+        "commands": [
+            {
                 "command": "extension.showRegexPreview",
-                "title": "Show Regex Preview"
-            }],
-        "keybindings": [{
-            "command": "extension.showRegexPreview",
-            "key": "ctrl+shift+m",
-            "mac": "cmd+shift+m",
-            "when": "editorTextFocus"
-        }]
+                "title": "Test Regexes Against Sample File"
+            },
+            {
+                "command": "extension.makeRegexPreview",
+                "title": "Test Regexes Against Current File"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "extension.showRegexPreview",
+                "key": "ctrl+shift+m",
+                "mac": "cmd+shift+m",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "extension.makeRegexPreview",
+                "key": "ctrl+alt+m",
+                "mac": "cmd+alt+m",
+                "when": "editorTextFocus"
+            }
+        ]
     },
     "scripts": {
         "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
