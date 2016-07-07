@@ -45,7 +45,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
         
         // TODO: figure out why originEditor.document is sometimes a different object
-        if (initialRegexMatch.document.uri.toString() === originEditor.document.uri.toString()) {
+        if (initialRegexMatch && initialRegexMatch.document && initialRegexMatch.document.uri.toString() === originEditor.document.uri.toString()) {
             initialRegexMatch.document = originEditor.document;
         }
 
