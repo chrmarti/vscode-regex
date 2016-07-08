@@ -30,7 +30,7 @@
         "commands": [
             {
                 "command": "extension.showRegexPreview",
-                "title": "Test Regexes Against Sample File"
+                "title": "Test Regexes Against Sample Text"
             },
             {
                 "command": "extension.makeRegexPreview",

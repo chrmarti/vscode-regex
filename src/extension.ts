@@ -13,8 +13,9 @@ export function activate(context: vscode.ExtensionContext) {
     const regexHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(100,100,100,.35)' });
     const matchHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(255,255,0,.35)' });
 
-    const matchesFilePath = context.asAbsolutePath('User/Regex Matches');
-    const matchesFileUri = vscode.Uri.file(matchesFilePath);
+    const matchesFilePath = context.asAbsolutePath('resources/sample.txt');
+    const matchesFileContent = fs.readFileSync(matchesFilePath, 'utf8');
+    const matchesFileUri = vscode.Uri.parse('untitled:/Regex Matches');
     const languages = ['javascript', 'typescript'];
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
@@ -51,6 +52,13 @@ export function activate(context: vscode.ExtensionContext) {
 
         return vscode.workspace.openTextDocument(matchesFileUri).then(document => {
             return vscode.window.showTextDocument(document, originEditor.viewColumn + 1, true);
+        }).then(editor => {
+            if (editor.document.lineCount === 1 && !editor.document.getText().length) {
+                editor.edit(builder => {
+                    builder.insert(new vscode.Position(0, 0), matchesFileContent);
+                }).then(() => editor);
+            }
+            return editor;
         }).then(editor => {
             tryApplyDecorator(editor, originEditor, initialRegexMatch);
         }).then(null, reason => {
