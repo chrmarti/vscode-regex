@@ -1,8 +1,16 @@
 ## Features
 
-Shows a selected regular expression's matches in a previewer. The preview text can be changed and saved for later use.
+Shows the current regular expression's matches in the side-by-side document.
+
+![Regex Previewer in Action](images/in_action.gif)
 
 ## Release Notes
+
+### 0.0.4
+
+- Allow any editor to show matches
+- Avoid storing sample file in installation directory
+- More bugfixes
 
 ### 0.0.3
 
