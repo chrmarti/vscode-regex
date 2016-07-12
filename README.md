@@ -6,6 +6,10 @@ Shows the current regular expression's matches in the side-by-side document.
 
 ## Release Notes
 
+### 0.0.5
+
+- Make it work on Windows again...
+
 ### 0.0.4
 
 - Allow any editor to show matches
