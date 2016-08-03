@@ -22,33 +22,21 @@
     "activationEvents": [
         "onLanguage:javascript",
         "onLanguage:typescript",
-        "onCommand:extension.showRegexPreview",
-        "onCommand:extension.makeRegexPreview"
+        "onCommand:extension.toggleRegexPreview"
     ],
     "main": "./out/src/extension",
     "contributes": {
         "commands": [
             {
-                "command": "extension.showRegexPreview",
-                "title": "Test Regexes Against Sample Text"
-            },
-            {
-                "command": "extension.makeRegexPreview",
-                "title": "Test Regexes Against Current File"
+                "command": "extension.toggleRegexPreview",
+                "title": "Toggle Regex Preview In Side-By-Side Editors"
             }
         ],
         "keybindings": [
             {
-                "command": "extension.showRegexPreview",
-                "key": "ctrl+shift+m",
-                "mac": "cmd+shift+m",
-                "when": "editorTextFocus"
-            },
-            {
-                "command": "extension.makeRegexPreview",
+                "command": "extension.toggleRegexPreview",
                 "key": "ctrl+alt+m",
-                "mac": "cmd+alt+m",
-                "when": "editorTextFocus"
+                "mac": "cmd+alt+m"
             }
         ]
     },

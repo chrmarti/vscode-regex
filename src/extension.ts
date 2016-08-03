@@ -20,56 +20,70 @@ export function activate(context: vscode.ExtensionContext) {
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
 
-    context.subscriptions.push(vscode.commands.registerTextEditorCommand('extension.showRegexPreview', showRegexPreview));
-    context.subscriptions.push(vscode.commands.registerTextEditorCommand('extension.makeRegexPreview', editor => applyDecorator(editor)));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.toggleRegexPreview', toggleRegexPreview));
 
     languages.forEach(language => {
         context.subscriptions.push(vscode.languages.registerCodeLensProvider(language, { provideCodeLenses }));
     });
 
-    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(tryApplyDecorator));
+    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(() => updateDecorators(findRegexEditor())));
+
+    const interval = setInterval(() => updateDecorators(null), 5000);
+    context.subscriptions.push({ dispose: () => clearInterval(interval) });
 
     function provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken) {
         const matches = findRegexes(document);
         return matches.map(match => new vscode.CodeLens(match.range, {
             title: 'Test Regex...',
-            command: 'extension.showRegexPreview',
+            command: 'extension.toggleRegexPreview',
             arguments: [ match ]
         }));
     }
 
-    function showRegexPreview(originEditor: vscode.TextEditor, builder?: vscode.TextEditorEdit, initialRegexMatch?: RegexMatch) {
-        const rootPath = vscode.workspace.rootPath;
-        if (!rootPath) {
-            vscode.window.showWarningMessage('No folder opened yet.');
-            return;
-        }
-        
-        // TODO: figure out why originEditor.document is sometimes a different object
-        if (initialRegexMatch && initialRegexMatch.document && initialRegexMatch.document.uri.toString() === originEditor.document.uri.toString()) {
-            initialRegexMatch.document = originEditor.document;
-        }
-
-        return vscode.workspace.openTextDocument(matchesFileUri).then(document => {
-            return vscode.window.showTextDocument(document, originEditor.viewColumn + 1, true);
-        }).then(editor => {
-            if (editor.document.lineCount === 1 && !editor.document.getText().length) {
-                editor.edit(builder => {
-                    builder.insert(new vscode.Position(0, 0), matchesFileContent);
-                }).then(() => editor);
+    let enabled = false;
+    function toggleRegexPreview(initialRegexMatch?: RegexMatch) {
+        if (enabled = !enabled || !!initialRegexMatch && !!initialRegexMatch.regex) {
+            const visibleEditors = vscode.window.visibleTextEditors;
+            if (visibleEditors.length === 1) {
+                return openLoremIpsum(visibleEditors[0].viewColumn + 1, initialRegexMatch);
+            } else {
+                updateDecorators(findRegexEditor(), initialRegexMatch);
             }
-            return editor;
+        } else {
+            decorators.forEach(decorator => decorator.dispose());
+        }
+    }
+
+    function openLoremIpsum(column: number, initialRegexMatch?: RegexMatch) {
+        return vscode.workspace.openTextDocument(matchesFileUri).then(document => {
+            return vscode.window.showTextDocument(document, column, true);
         }).then(editor => {
-            tryApplyDecorator(editor, originEditor, initialRegexMatch);
+            return editor.edit(builder => {
+                builder.insert(new vscode.Position(0, 0), matchesFileContent);
+            }).then(() => {
+                updateDecorators(findRegexEditor(), initialRegexMatch);
+            });
         }).then(null, reason => {
             vscode.window.showErrorMessage(reason);
         });
     }
 
-    function tryApplyDecorator(matchEditor: vscode.TextEditor, initialRegexEditor?: vscode.TextEditor, initialRegexMatch?: RegexMatch) {
-        if (matchEditor && matchEditor.document.uri.toString() === matchesFileUri.toString()) {
-            applyDecorator(matchEditor, initialRegexEditor, initialRegexMatch);
+    function updateDecorators(regexEditor: vscode.TextEditor, initialRegexMatch?: RegexMatch) {
+        if (!enabled) {
+            return;
         }
+        
+        // TODO: figure out why originEditor.document is sometimes a different object
+        if (regexEditor && initialRegexMatch && initialRegexMatch.document && initialRegexMatch.document.uri.toString() === regexEditor.document.uri.toString()) {
+            initialRegexMatch.document = regexEditor.document;
+        }
+
+        const remove = new Map(decorators);
+        vscode.window.visibleTextEditors.forEach(editor => {
+            remove.delete(editor);
+            applyDecorator(editor, regexEditor, initialRegexMatch);
+        });
+        remove.forEach(decorator => decorator.dispose());
     }
 
     function applyDecorator(matchEditor: vscode.TextEditor, initialRegexEditor?: vscode.TextEditor, initialRegexMatch?: RegexMatch) {
@@ -138,6 +152,11 @@ export function activate(context: vscode.ExtensionContext) {
             this.disposables.push(vscode.window.onDidChangeActiveTextEditor(e => {
                 this.update();
             }));
+
+            this.disposables.push({ dispose: () => {
+                matchEditor.setDecorations(matchHighlight, []);
+                matchEditor.setDecorations(regexHighlight, []);
+            }});
         }
 
         public apply(stableRegexEditor?: vscode.TextEditor, stableRegexMatch?: RegexMatch) {
@@ -163,7 +182,7 @@ export function activate(context: vscode.ExtensionContext) {
                     regex = this.stableRegexMatch;
                 }
             }
-            const matches = regex ? findMatches(regex, this.matchEditor.document) : [];
+            const matches = regex && regexEditor !== this.matchEditor ? findMatches(regex, this.matchEditor.document) : [];
             this.matchEditor.setDecorations(matchHighlight, matches.map(match => match.range));
 
             if (regexEditor) {
@@ -236,6 +255,4 @@ export function activate(context: vscode.ExtensionContext) {
         }
         return matches;
     }
-
-    vscode.window.visibleTextEditors.forEach(editor => tryApplyDecorator(editor));
 }
