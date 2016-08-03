@@ -1,10 +1,14 @@
 ## Features
 
-Shows the current regular expression's matches in the side-by-side document.
+Shows the current regular expression's matches in the side-by-side document. Turn on/off with `Ctrl+Alt+M` (`⌥⌘M`).
 
 ![Regex Previewer in Action](images/in_action.gif)
 
 ## Release Notes
+
+### 0.0.6
+
+- Single toggle action to turn Regex matching on/off
 
 ### 0.0.5
 
