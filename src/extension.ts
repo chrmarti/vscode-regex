@@ -218,7 +218,10 @@ export function activate(context: vscode.ExtensionContext) {
             let match: RegExpExecArray;
             regexRegex.lastIndex = 0;
             while ((match = regexRegex.exec(line.text))) {
-                matches.push(createRegexMatch(document, i, match));
+                const regex = createRegexMatch(document, i, match);
+                if (regex) {
+                    matches.push(regex);
+                }
             }
         }
         return matches;
