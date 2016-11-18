@@ -255,6 +255,10 @@ export function activate(context: vscode.ExtensionContext) {
             matches.push({
                 range: new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length))
             });
+            // Handle empty matches (fixes #4)
+            if (regex.lastIndex === match.index) {
+                regex.lastIndex++;
+            }
         }
         return matches;
     }
