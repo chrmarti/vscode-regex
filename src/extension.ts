@@ -43,7 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
     let enabled = false;
     function toggleRegexPreview(initialRegexMatch?: RegexMatch) {
         if (enabled = !enabled || !!initialRegexMatch && !!initialRegexMatch.regex) {
-            const visibleEditors = vscode.window.visibleTextEditors;
+            const visibleEditors = getVisibleTextEditors();
             if (visibleEditors.length === 1) {
                 return openLoremIpsum(visibleEditors[0].viewColumn + 1, initialRegexMatch);
             } else {
@@ -79,11 +79,15 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const remove = new Map(decorators);
-        vscode.window.visibleTextEditors.forEach(editor => {
+        getVisibleTextEditors().forEach(editor => {
             remove.delete(editor);
             applyDecorator(editor, regexEditor, initialRegexMatch);
         });
         remove.forEach(decorator => decorator.dispose());
+    }
+
+    function getVisibleTextEditors() {
+        return vscode.window.visibleTextEditors.filter(editor => typeof editor.viewColumn === 'number');
     }
 
     function applyDecorator(matchEditor: vscode.TextEditor, initialRegexEditor?: vscode.TextEditor, initialRegexMatch?: RegexMatch) {
