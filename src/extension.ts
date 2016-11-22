@@ -55,16 +55,36 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     function openLoremIpsum(column: number, initialRegexMatch?: RegexMatch) {
-        return vscode.workspace.openTextDocument(matchesFileUri).then(document => {
-            return vscode.window.showTextDocument(document, column, true);
-        }).then(editor => {
-            return editor.edit(builder => {
-                builder.insert(new vscode.Position(0, 0), matchesFileContent);
-            }).then(() => {
-                updateDecorators(findRegexEditor(), initialRegexMatch);
+        return fileExists(matchesFileUri.fsPath).then(exists => {
+            return vscode.workspace.openTextDocument(exists ? matchesFileUri.with({ scheme: 'file' }) : matchesFileUri).then(document => {
+                return vscode.window.showTextDocument(document, column, true);
+            }).then(editor => {
+                if (!exists) {
+                    return editor.edit(builder => {
+                        builder.insert(new vscode.Position(0, 0), matchesFileContent);
+                    }).then(() => {
+                        updateDecorators(findRegexEditor(), initialRegexMatch);
+                    });
+                } else {
+                    updateDecorators(findRegexEditor(), initialRegexMatch);
+                }
             });
         }).then(null, reason => {
             vscode.window.showErrorMessage(reason);
+        });
+    }
+
+    function fileExists(path: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            fs.lstat(path, (err, stats) => {
+                if (!err) {
+                    resolve(true);
+                } else if (err.code === 'ENOENT') {
+                    resolve(false);
+                } else {
+                    reject(err);
+                }
+            });
         });
     }
 
