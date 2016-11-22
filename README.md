@@ -6,6 +6,11 @@ Shows the current regular expression's matches in the side-by-side document. Tur
 
 ## Release Notes
 
+### 0.0.7
+
+- Several bugfixes
+- Catch up with latest release
+
 ### 0.0.6
 
 - Single toggle action to turn Regex matching on/off
