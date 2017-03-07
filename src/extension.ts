@@ -10,13 +10,14 @@ import * as vscode from 'vscode';
 export function activate(context: vscode.ExtensionContext) {
     
     const regexRegex = /(^|\s|[()={},:?;])(\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))(\s|[()={},:?;]|$)/g;
+    const haxeRegexRegex = /(^|\s|[()={},:?;])(~\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimsu]*))(\s|[.()={},:?;]|$)/g;
     const regexHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(100,100,100,.35)' });
     const matchHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(255,255,0,.35)' });
 
     const matchesFilePath = context.asAbsolutePath('resources/sample.txt');
     const matchesFileContent = fs.readFileSync(matchesFilePath, 'utf8');
     const matchesFileUri = vscode.Uri.parse(`untitled:${path.sep}Regex Matches`);
-    const languages = ['javascript', 'typescript'];
+    const languages = ['javascript', 'typescript', 'haxe'];
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
 
@@ -220,7 +221,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (!activeEditor || languages.indexOf(activeEditor.document.languageId) === -1) {
             return null;
         }
-        return activeEditor;        
+        return activeEditor;
     }
 
     function findRegexAtCaret(editor: vscode.TextEditor): RegexMatch {
@@ -228,8 +229,9 @@ export function activate(context: vscode.ExtensionContext) {
         const text = editor.document.lineAt(anchor).text;
 
         let match: RegExpExecArray;
-        regexRegex.lastIndex = 0;
-        while ((match = regexRegex.exec(text)) && (match.index + match[1].length + match[2].length < anchor.character));
+        let regex = getRegexRegex(editor.document.languageId);
+        regex.lastIndex = 0;
+        while ((match = regex.exec(text)) && (match.index + match[1].length + match[2].length < anchor.character));
         if (match && match.index + match[1].length <= anchor.character) {
             return createRegexMatch(editor.document, anchor.line, match);
         }
@@ -240,8 +242,9 @@ export function activate(context: vscode.ExtensionContext) {
         for (let i = 0; i < document.lineCount; i++) {
             const line = document.lineAt(i);
             let match: RegExpExecArray;
-            regexRegex.lastIndex = 0;
-            while ((match = regexRegex.exec(line.text))) {
+            let regex = getRegexRegex(document.languageId);
+            regex.lastIndex = 0;
+            while ((match = regex.exec(line.text))) {
                 const regex = createRegexMatch(document, i, match);
                 if (regex) {
                     matches.push(regex);
@@ -249,6 +252,13 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }
         return matches;
+    }
+
+    function getRegexRegex(languageId: String) {
+        if (languageId == 'haxe') {
+            return haxeRegexRegex;
+        }
+        return regexRegex;
     }
 
     function createRegexMatch(document: vscode.TextDocument, line: number, match: RegExpExecArray) {
