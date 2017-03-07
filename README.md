@@ -6,6 +6,10 @@ Shows the current regular expression's matches in the side-by-side document. Tur
 
 ## Release Notes
 
+### 0.0.8
+
+- Add Haxe support (PR by @Gama11)
+
 ### 0.0.7
 
 - Several bugfixes
