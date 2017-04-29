@@ -1,56 +1,58 @@
 {
-    "name": "regex",
-    "displayName": "Regex Previewer",
-    "description": "Regex matches previewer for JavaScript, TypeScript and Haxe in Visual Studio Code.",
-    "version": "0.0.8",
-    "publisher": "chrmarti",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/chrmarti/vscode-regex.git"
-    },
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/chrmarti/vscode-regex/issues"
-    },
-    "icon": "images/icon.png",
-    "engines": {
-        "vscode": "^1.6.0"
-    },
-    "categories": [
-        "Other"
+  "name": "regex",
+  "displayName": "Regex Previewer",
+  "description": "Regex matches previewer for JavaScript, TypeScript and Haxe in Visual Studio Code.",
+  "version": "0.0.8",
+  "publisher": "chrmarti",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrmarti/vscode-regex.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chrmarti/vscode-regex/issues"
+  },
+  "icon": "images/icon.png",
+  "engines": {
+    "vscode": "^1.11.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:haxe",
+    "onCommand:extension.toggleRegexPreview"
+  ],
+  "main": "./out/src/extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.toggleRegexPreview",
+        "title": "Toggle Regex Preview In Side-By-Side Editors"
+      }
     ],
-    "activationEvents": [
-        "onLanguage:javascript",
-        "onLanguage:typescript",
-        "onLanguage:haxe",
-        "onCommand:extension.toggleRegexPreview"
-    ],
-    "main": "./out/src/extension",
-    "contributes": {
-        "commands": [
-            {
-                "command": "extension.toggleRegexPreview",
-                "title": "Toggle Regex Preview In Side-By-Side Editors"
-            }
-        ],
-        "keybindings": [
-            {
-                "command": "extension.toggleRegexPreview",
-                "key": "ctrl+alt+m",
-                "mac": "cmd+alt+m"
-            }
-        ]
-    },
-    "scripts": {
-        "vscode:prepublish": "tsc -p ./",
-        "compile": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install"
-    },
-    "devDependencies": {
-        "typescript": "^2.0.10",
-        "vscode": "^1.0.3",
-        "mocha": "^2.3.3",
-        "@types/node": "^6.0.40",
-        "@types/mocha": "^2.2.32"
-   }
+    "keybindings": [
+      {
+        "command": "extension.toggleRegexPreview",
+        "key": "ctrl+alt+m",
+        "mac": "cmd+alt+m"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "tsc -p ./",
+    "compile": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.41",
+    "@types/node": "^6.0.71",
+    "mocha": "^2.5.3",
+    "typescript": "^2.3.2"
+  },
+  "dependencies": {
+    "vscode": "^1.1.0"
+  }
 }

@@ -29,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(() => updateDecorators(findRegexEditor())));
 
-    const interval = setInterval(() => updateDecorators(null), 5000);
+    const interval = setInterval(() => updateDecorators(), 5000);
     context.subscriptions.push({ dispose: () => clearInterval(interval) });
 
     function provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken) {
@@ -46,7 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (enabled = !enabled || !!initialRegexMatch && !!initialRegexMatch.regex) {
             const visibleEditors = getVisibleTextEditors();
             if (visibleEditors.length === 1) {
-                return openLoremIpsum(visibleEditors[0].viewColumn + 1, initialRegexMatch);
+                return openLoremIpsum(visibleEditors[0].viewColumn! + 1, initialRegexMatch);
             } else {
                 updateDecorators(findRegexEditor(), initialRegexMatch);
             }
@@ -89,7 +89,7 @@ export function activate(context: vscode.ExtensionContext) {
         });
     }
 
-    function updateDecorators(regexEditor: vscode.TextEditor, initialRegexMatch?: RegexMatch) {
+    function updateDecorators(regexEditor?: vscode.TextEditor, initialRegexMatch?: RegexMatch) {
         if (!enabled) {
             return;
         }
@@ -120,7 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
             decorators.set(matchEditor, decorator);
         }
         if (newDecorator || initialRegexEditor || initialRegexMatch) {
-            decorator.apply(initialRegexEditor, initialRegexMatch);
+            decorator!.apply(initialRegexEditor, initialRegexMatch);
         }
     }
 
@@ -145,16 +145,16 @@ export function activate(context: vscode.ExtensionContext) {
 
     class RegexMatchDecorator {
 
-        private stableRegexEditor: vscode.TextEditor;
-        private stableRegexMatch: RegexMatch;
+        private stableRegexEditor?: vscode.TextEditor;
+        private stableRegexMatch?: RegexMatch;
         private disposables: vscode.Disposable[] = [];
 
         constructor(private matchEditor: vscode.TextEditor) {
 
             this.disposables.push(vscode.workspace.onDidCloseTextDocument(e => {
                 if (this.stableRegexEditor && e === this.stableRegexEditor.document) {
-                    this.stableRegexEditor = null;
-                    this.stableRegexMatch = null;
+                    this.stableRegexEditor = undefined;
+                    this.stableRegexMatch = undefined;
                     matchEditor.setDecorations(matchHighlight, []);
                 } else if (e === matchEditor.document) {
                     this.dispose();
@@ -169,7 +169,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             this.disposables.push(vscode.window.onDidChangeTextEditorSelection(e => {
                 if (this.stableRegexEditor && e.textEditor === this.stableRegexEditor) {
-                    this.stableRegexMatch = null;
+                    this.stableRegexMatch = undefined;
                     this.update();
                 }
             }));
@@ -202,7 +202,7 @@ export function activate(context: vscode.ExtensionContext) {
             let regex = regexEditor && findRegexAtCaret(regexEditor);
             if (this.stableRegexMatch) {
                 if (regex || !regexEditor || regexEditor.document !== this.stableRegexMatch.document) {
-                    this.stableRegexMatch = null;
+                    this.stableRegexMatch = undefined;
                 } else {
                     regex = this.stableRegexMatch;
                 }
@@ -219,16 +219,16 @@ export function activate(context: vscode.ExtensionContext) {
     function findRegexEditor() {
         const activeEditor = vscode.window.activeTextEditor;
         if (!activeEditor || languages.indexOf(activeEditor.document.languageId) === -1) {
-            return null;
+            return undefined;
         }
         return activeEditor;
     }
 
-    function findRegexAtCaret(editor: vscode.TextEditor): RegexMatch {
+    function findRegexAtCaret(editor: vscode.TextEditor): RegexMatch | undefined {
         const anchor = editor.selection.anchor;
         const text = editor.document.lineAt(anchor).text;
 
-        let match: RegExpExecArray;
+        let match: RegExpExecArray | null;
         let regex = getRegexRegex(editor.document.languageId);
         regex.lastIndex = 0;
         while ((match = regex.exec(text)) && (match.index + match[1].length + match[2].length < anchor.character));
@@ -241,7 +241,7 @@ export function activate(context: vscode.ExtensionContext) {
         const matches: RegexMatch[] = [];
         for (let i = 0; i < document.lineCount; i++) {
             const line = document.lineAt(i);
-            let match: RegExpExecArray;
+            let match: RegExpExecArray | null;
             let regex = getRegexRegex(document.languageId);
             regex.lastIndex = 0;
             while ((match = regex.exec(line.text))) {
@@ -284,7 +284,7 @@ export function activate(context: vscode.ExtensionContext) {
         const text = document.getText();
         const matches: Match[] = [];
         const regex = regexMatch.regex;
-        let match: RegExpExecArray;
+        let match: RegExpExecArray | null;
         while ((regex.global || !matches.length) && (match = regex.exec(text))) {
             matches.push({
                 range: new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length))
