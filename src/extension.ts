@@ -220,7 +220,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     function findRegexAtCaret(editor: vscode.TextEditor): RegexMatch | undefined {
         const anchor = editor.selection.anchor;
-        const text = editor.document.lineAt(anchor).text;
+        const line = editor.document.lineAt(anchor);
+        const text = line.text.substr(0, 1000);
 
         let match: RegExpExecArray | null;
         let regex = getRegexRegex(editor.document.languageId);
@@ -238,10 +239,11 @@ export function activate(context: vscode.ExtensionContext) {
             let match: RegExpExecArray | null;
             let regex = getRegexRegex(document.languageId);
             regex.lastIndex = 0;
-            while ((match = regex.exec(line.text))) {
-                const regex = createRegexMatch(document, i, match);
-                if (regex) {
-                    matches.push(regex);
+            const text = line.text.substr(0, 1000);
+            while ((match = regex.exec(text))) {
+                const result = createRegexMatch(document, i, match);
+                if (result) {
+                    matches.push(result);
                 }
             }
         }
