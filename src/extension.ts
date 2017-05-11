@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const matchesFilePath = context.asAbsolutePath('resources/sample.txt');
     const matchesFileContent = fs.readFileSync(matchesFilePath, 'utf8');
-    const matchesFileUri = vscode.Uri.parse(`untitled:${path.sep}Regex Matches`);
+    const legacyMatchesFileUri = vscode.Uri.parse(`untitled:${path.sep}Regex Matches`);
     const languages = ['javascript', 'typescript', 'haxe'];
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
@@ -56,19 +56,13 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     function openLoremIpsum(column: number, initialRegexMatch?: RegexMatch) {
-        return fileExists(matchesFileUri.fsPath).then(exists => {
-            return vscode.workspace.openTextDocument(exists ? matchesFileUri.with({ scheme: 'file' }) : matchesFileUri).then(document => {
+        return fileExists(legacyMatchesFileUri.fsPath).then(exists => {
+            return (exists ? vscode.workspace.openTextDocument(legacyMatchesFileUri.with({ scheme: 'file' })) :
+                vscode.workspace.openTextDocument({ language: 'text', content: matchesFileContent }))
+            .then(document => {
                 return vscode.window.showTextDocument(document, column, true);
             }).then(editor => {
-                if (!exists) {
-                    return editor.edit(builder => {
-                        builder.insert(new vscode.Position(0, 0), matchesFileContent);
-                    }).then(() => {
-                        updateDecorators(findRegexEditor(), initialRegexMatch);
-                    });
-                } else {
-                    updateDecorators(findRegexEditor(), initialRegexMatch);
-                }
+                updateDecorators(findRegexEditor(), initialRegexMatch);
             });
         }).then(null, reason => {
             vscode.window.showErrorMessage(reason);
