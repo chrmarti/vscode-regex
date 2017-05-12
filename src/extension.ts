@@ -41,9 +41,42 @@ export function activate(context: vscode.ExtensionContext) {
         }));
     }
 
+    let addGMEnabled = false;
+    const toggleGM = vscode.window.createStatusBarItem();
+    toggleGM.command = 'regexpreview.toggleGM';
+    context.subscriptions.push(toggleGM);
+    context.subscriptions.push(vscode.commands.registerCommand('regexpreview.toggleGM', () => {
+        addGMEnabled = !addGMEnabled;
+        updateToggleGM();
+        for (const decorator of decorators.values()) {
+            decorator.update();
+        }
+    }))
+    function updateToggleGM() {
+        toggleGM.text = addGMEnabled ? 'Adding /gm' : 'Not adding /gm';
+        toggleGM.tooltip = addGMEnabled ? 'Click to stop adding global and multiline (/gm) options to regexes for evaluation with example text.' : 'Click to add global and multiline (/gm) options to regexes for evaluation with example text.'
+    }
+    updateToggleGM();
+    function addGM(regex: RegExp) {
+        if (!addGMEnabled || (regex.global && regex.multiline)) {
+            return regex;
+        }
+
+        let flags = regex.flags;
+        if (!regex.global) {
+            flags += 'g';
+        }
+        if (!regex.multiline) {
+            flags += 'm';
+        }
+        return new RegExp(regex.source, flags);
+    }
+
     let enabled = false;
     function toggleRegexPreview(initialRegexMatch?: RegexMatch) {
-        if (enabled = !enabled || !!initialRegexMatch && !!initialRegexMatch.regex) {
+        enabled = !enabled || !!initialRegexMatch && !!initialRegexMatch.regex;
+        toggleGM[enabled ? 'show' : 'hide']();
+        if (enabled) {
             const visibleEditors = getVisibleTextEditors();
             if (visibleEditors.length === 1) {
                 return openLoremIpsum(visibleEditors[0].viewColumn! + 1, initialRegexMatch);
@@ -191,7 +224,7 @@ export function activate(context: vscode.ExtensionContext) {
             });
         }
 
-        private update() {
+        public update() {
             const regexEditor = this.stableRegexEditor = findRegexEditor() || this.stableRegexEditor;
             let regex = regexEditor && findRegexAtCaret(regexEditor);
             if (this.stableRegexMatch) {
@@ -279,7 +312,7 @@ export function activate(context: vscode.ExtensionContext) {
     function findMatches(regexMatch: RegexMatch, document: vscode.TextDocument) {
         const text = document.getText();
         const matches: Match[] = [];
-        const regex = regexMatch.regex;
+        const regex = addGM(regexMatch.regex);
         let match: RegExpExecArray | null;
         while ((regex.global || !matches.length) && (match = regex.exec(text))) {
             matches.push({
