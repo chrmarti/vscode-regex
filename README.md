@@ -1,6 +1,8 @@
 ## Features
 
-Shows the current regular expression's matches in the side-by-side document. Turn on/off with `Ctrl+Alt+M` (`⌥⌘M`).
+Shows the current regular expression's matches in a side-by-side document. This can be turned on/off with `Ctrl+Alt+M` (`⌥⌘M`).
+
+Global and multiline options can be added for evaluation with a side-by-side document through a status bar entry. This can be useful when the side-by-side document has multiple examples to match.
 
 ![Regex Previewer in Action](images/in_action.gif)
 
