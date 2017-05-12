@@ -6,6 +6,11 @@ Shows the current regular expression's matches in the side-by-side document. Tur
 
 ## Release Notes
 
+### 0.1.0
+
+- Status bar item to toggle adding global and multiline flags for evaluation with example text.
+- Bugfixes
+
 ### 0.0.8
 
 - Add Haxe support (PR by @Gama11)
