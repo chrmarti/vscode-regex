@@ -8,8 +8,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 export function activate(context: vscode.ExtensionContext) {
-    
-    const regexRegex = /(^|\s|[()={},:?;])(\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))(\s|[()={},:?;]|$)/g;
+
+    const regexRegex = /(^|\s|[()={},:?;])['|"]?(\/((?:\\\/|\[[^\]]*\]|[^/])+)\/['|"]?([gimuy]*))(\s|[()={},:?;]|$)/g;
     const haxeRegexRegex = /(^|\s|[()={},:?;])(~\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimsu]*))(\s|[.()={},:?;]|$)/g;
     const regexHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(100,100,100,.35)' });
     const matchHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(255,255,0,.35)' });
@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
     const matchesFilePath = context.asAbsolutePath('resources/sample.txt');
     const matchesFileContent = fs.readFileSync(matchesFilePath, 'utf8');
     const legacyMatchesFileUri = vscode.Uri.parse(`untitled:${path.sep}Regex Matches`);
-    const languages = ['javascript', 'typescript', 'haxe'];
+    const languages = ['javascript', 'php', 'typescript', 'haxe'];
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
 
@@ -120,7 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (!enabled) {
             return;
         }
-        
+
         // TODO: figure out why originEditor.document is sometimes a different object
         if (regexEditor && initialRegexMatch && initialRegexMatch.document && initialRegexMatch.document.uri.toString() === regexEditor.document.uri.toString()) {
             initialRegexMatch.document = regexEditor.document;
