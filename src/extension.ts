@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 export function activate(context: vscode.ExtensionContext) {
-    
+
     const regexRegex = /(^|\s|[()={},:?;])(\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))(\s|[()={},:?;]|$)/g;
     const haxeRegexRegex = /(^|\s|[()={},:?;])(~\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimsu]*))(\s|[.()={},:?;]|$)/g;
     const regexHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(100,100,100,.35)' });
@@ -18,14 +18,18 @@ export function activate(context: vscode.ExtensionContext) {
     const matchesFileContent = fs.readFileSync(matchesFilePath, 'utf8');
     const legacyMatchesFileUri = vscode.Uri.parse(`untitled:${path.sep}Regex Matches`);
     const languages = ['javascript', 'typescript', 'haxe'];
+    const config = vscode.workspace.getConfiguration("regex-previewer");
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.toggleRegexPreview', toggleRegexPreview));
+    const shouldRegisterCodeLens = config.enableCodeLens;
 
-    languages.forEach(language => {
-        context.subscriptions.push(vscode.languages.registerCodeLensProvider(language, { provideCodeLenses }));
-    });
+    if (shouldRegisterCodeLens) {
+        languages.forEach(language => {
+            context.subscriptions.push(vscode.languages.registerCodeLensProvider(language, { provideCodeLenses }));
+        });
+    }
 
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(() => updateDecorators(findRegexEditor())));
 
@@ -120,7 +124,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (!enabled) {
             return;
         }
-        
+
         // TODO: figure out why originEditor.document is sometimes a different object
         if (regexEditor && initialRegexMatch && initialRegexMatch.document && initialRegexMatch.document.uri.toString() === regexEditor.document.uri.toString()) {
             initialRegexMatch.document = regexEditor.document;

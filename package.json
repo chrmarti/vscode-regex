@@ -27,6 +27,17 @@
   ],
   "main": "./out/src/extension",
   "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Regex Previewer Configuration",
+      "properties": {
+        "regex-previewer.enableCodeLens": {
+          "type":"boolean",
+          "default": false,
+          "description": "Enables code lens for regex previewer"
+        }
+      }
+    },
     "commands": [
       {
         "command": "extension.toggleRegexPreview",
