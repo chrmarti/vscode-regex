@@ -18,18 +18,13 @@ export function activate(context: vscode.ExtensionContext) {
     const matchesFileContent = fs.readFileSync(matchesFilePath, 'utf8');
     const legacyMatchesFileUri = vscode.Uri.parse(`untitled:${path.sep}Regex Matches`);
     const languages = ['javascript', 'typescript', 'haxe'];
-    const config = vscode.workspace.getConfiguration("regex-previewer");
-
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.toggleRegexPreview', toggleRegexPreview));
-    const shouldRegisterCodeLens = config.enableCodeLens;
 
-    if (shouldRegisterCodeLens) {
-        languages.forEach(language => {
-            context.subscriptions.push(vscode.languages.registerCodeLensProvider(language, { provideCodeLenses }));
-        });
-    }
+    languages.forEach(language => {
+        context.subscriptions.push(vscode.languages.registerCodeLensProvider(language, { provideCodeLenses }));
+    });
 
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(() => updateDecorators(findRegexEditor())));
 
@@ -37,6 +32,9 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push({ dispose: () => clearInterval(interval) });
 
     function provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken) {
+        const config = vscode.workspace.getConfiguration("regex-previewer");
+        if (!config.enableCodeLens) return;
+
         const matches = findRegexes(document);
         return matches.map(match => new vscode.CodeLens(match.range, {
             title: 'Test Regex...',
