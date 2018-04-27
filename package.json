@@ -34,8 +34,8 @@
       "properties": {
         "regex-previewer.enableCodeLens": {
           "type":"boolean",
-          "default": false,
-          "description": "Enables code lens for regex previewer"
+          "default": true,
+          "description": "Enables code lens for Regex Previewer"
         }
       }
     },
