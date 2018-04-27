@@ -34,6 +34,9 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push({ dispose: () => clearInterval(interval) });
 
     function provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken) {
+        const config = vscode.workspace.getConfiguration("regex-previewer");
+        if (!config.enableCodeLens) return;
+
         const matches = findRegexes(document);
         return matches.map(match => new vscode.CodeLens(match.range, {
             title: 'Test Regex...',
