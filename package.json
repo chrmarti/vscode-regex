@@ -14,7 +14,7 @@
   },
   "icon": "images/icon.png",
   "engines": {
-    "vscode": "^1.11.0"
+    "vscode": "^1.18.0"
   },
   "categories": [
     "Other"
@@ -33,6 +33,7 @@
       "title": "Regex Previewer Configuration",
       "properties": {
         "regex-previewer.enableCodeLens": {
+          "scope": "resource",
           "type":"boolean",
           "default": true,
           "description": "Enables code lens for Regex Previewer"
