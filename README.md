@@ -8,6 +8,12 @@ Global and multiline options can be added for evaluation with a side-by-side doc
 
 ## Release Notes
 
+### 0.2.0
+
+- Add PHP support (PR by [@ergunsh](https://github.com/ergunsh))
+- Add setting to disable the code lens (PR by [@ergunsh](https://github.com/ergunsh))
+- Add more sample text (PR by [@mscolnick](https://github.com/mscolnick))
+
 ### 0.1.0
 
 - Status bar item to toggle adding global and multiline flags for evaluation with example text.
@@ -15,7 +21,7 @@ Global and multiline options can be added for evaluation with a side-by-side doc
 
 ### 0.0.8
 
-- Add Haxe support (PR by @Gama11)
+- Add Haxe support (PR by [@Gama11](https://github.com/Gama11))
 
 ### 0.0.7
 
