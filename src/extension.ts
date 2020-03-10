@@ -9,6 +9,8 @@ import * as vscode from 'vscode';
 
 export function activate(context: vscode.ExtensionContext) {
 
+    const companionExtensionId = 'louiswt.regexp-preview';
+    const companionExtensionCommand = 'regexExplainer.getExplainRegexHtml';
     const regexRegex = /(^|\s|[()={},:?;])(\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))(\s|[()={},:?;]|$)/g;
     const phpRegexRegex = /(^|\s|[()={},:?;])['|"](\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))['|"](\s|[()={},:?;]|$)/g;
     const haxeRegexRegex = /(^|\s|[()={},:?;])(~\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimsu]*))(\s|[.()={},:?;]|$)/g;
@@ -21,6 +23,12 @@ export function activate(context: vscode.ExtensionContext) {
     const languages = ['javascript', 'php', 'typescript', 'haxe'];
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
+
+    let tmrExplainPanelRefresher: NodeJS.Timeout;
+    let explainPanel: vscode.WebviewPanel;
+    let wasExplainPanelRefreshed: boolean;
+
+    const isExplainPanelAvailable = vscode.workspace.getConfiguration().get('regex-previewer.enableExplainPanel', false) && vscode.extensions.getExtension(companionExtensionId) !== undefined;
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.toggleRegexPreview', toggleRegexPreview));
 
@@ -41,7 +49,7 @@ export function activate(context: vscode.ExtensionContext) {
         return matches.map(match => new vscode.CodeLens(match.range, {
             title: 'Test Regex...',
             command: 'extension.toggleRegexPreview',
-            arguments: [ match ]
+            arguments: [match]
         }));
     }
 
@@ -83,7 +91,8 @@ export function activate(context: vscode.ExtensionContext) {
         if (enabled) {
             const visibleEditors = getVisibleTextEditors();
             if (visibleEditors.length === 1) {
-                return openLoremIpsum(visibleEditors[0].viewColumn! + 1, initialRegexMatch);
+                const viewColumn = visibleEditors[0].viewColumn! + 1;
+                return openLoremIpsum(viewColumn, initialRegexMatch);
             } else {
                 updateDecorators(findRegexEditor(), initialRegexMatch);
             }
@@ -96,14 +105,52 @@ export function activate(context: vscode.ExtensionContext) {
         return fileExists(legacyMatchesFileUri.fsPath).then(exists => {
             return (exists ? vscode.workspace.openTextDocument(legacyMatchesFileUri.with({ scheme: 'file' })) :
                 vscode.workspace.openTextDocument({ language: 'text', content: matchesFileContent }))
-            .then(document => {
-                return vscode.window.showTextDocument(document, column, true);
-            }).then(editor => {
-                updateDecorators(findRegexEditor(), initialRegexMatch);
-            });
+                .then(document => {
+                    return isExplainPanelAvailable
+                        ? showExplainPanel(vscode.window.activeTextEditor!, document, column, initialRegexMatch)
+                        : vscode.window.showTextDocument(document, column, true);
+                }).then(editor => {
+                    updateDecorators(findRegexEditor(), initialRegexMatch);
+                });
         }).then(null, reason => {
             vscode.window.showErrorMessage(reason);
         });
+    }
+
+    async function showExplainPanel(activeTextEditor: vscode.TextEditor, document: vscode.TextDocument, column: number, initialRegexMatch?: RegexMatch): Promise<vscode.TextEditor> {
+        const currentDoc = activeTextEditor.document;
+        let textEditor: vscode.TextEditor;
+        let hasToBeMoved: boolean = false;
+        if (!explainPanel || (<any>explainPanel)._isDisposed) {
+            explainPanel = vscode.window.createWebviewPanel(
+                'regex',
+                'Explain RegEx',
+                column,
+                {
+                    enableScripts: true,
+                    retainContextWhenHidden: false,
+                }
+            )
+            hasToBeMoved = true;
+        }
+        else
+            explainPanel.reveal();
+
+        textEditor = await vscode.window.showTextDocument(document, column + 1, false);
+        if (hasToBeMoved)
+            await vscode.commands.executeCommand('workbench.action.moveActiveEditorGroupUp');
+        await vscode.window.showTextDocument(currentDoc, column - 1);
+        explainPanel.webview.html = "<p>Loading...</p>";
+        if (initialRegexMatch) {
+            if (tmrExplainPanelRefresher)
+                clearTimeout(tmrExplainPanelRefresher);
+            tmrExplainPanelRefresher = setTimeout(() => {
+                getRegexExplanationImage(initialRegexMatch.regex.toString()).then(result => {
+                    explainPanel.webview.html = result;
+                })
+            }, 200);
+        }
+        return textEditor;
     }
 
     function fileExists(path: string): Promise<boolean> {
@@ -120,7 +167,7 @@ export function activate(context: vscode.ExtensionContext) {
         });
     }
 
-    function updateDecorators(regexEditor?: vscode.TextEditor, initialRegexMatch?: RegexMatch) {
+    async function updateDecorators(regexEditor?: vscode.TextEditor, initialRegexMatch?: RegexMatch) {
         if (!enabled) {
             return;
         }
@@ -130,6 +177,7 @@ export function activate(context: vscode.ExtensionContext) {
             initialRegexMatch.document = regexEditor.document;
         }
 
+        wasExplainPanelRefreshed = false;
         const remove = new Map(decorators);
         getVisibleTextEditors().forEach(editor => {
             remove.delete(editor);
@@ -209,10 +257,12 @@ export function activate(context: vscode.ExtensionContext) {
                 this.update();
             }));
 
-            this.disposables.push({ dispose: () => {
-                matchEditor.setDecorations(matchHighlight, []);
-                matchEditor.setDecorations(regexHighlight, []);
-            }});
+            this.disposables.push({
+                dispose: () => {
+                    matchEditor.setDecorations(matchHighlight, []);
+                    matchEditor.setDecorations(regexHighlight, []);
+                }
+            });
         }
 
         public apply(stableRegexEditor?: vscode.TextEditor, stableRegexMatch?: RegexMatch) {
@@ -242,7 +292,7 @@ export function activate(context: vscode.ExtensionContext) {
             this.matchEditor.setDecorations(matchHighlight, matches.map(match => match.range));
 
             if (regexEditor) {
-                regexEditor.setDecorations(regexHighlight, (this.stableRegexMatch || regexEditor !== vscode.window.activeTextEditor) && regex ? [ regex.range ] : []);
+                regexEditor.setDecorations(regexHighlight, (this.stableRegexMatch || regexEditor !== vscode.window.activeTextEditor) && regex ? [regex.range] : []);
             }
         }
     }
@@ -296,9 +346,21 @@ export function activate(context: vscode.ExtensionContext) {
         return regexRegex;
     }
 
+
     function createRegexMatch(document: vscode.TextDocument, line: number, match: RegExpExecArray) {
         const regex = createRegex(match[3], match[4]);
         if (regex) {
+            if (isExplainPanelAvailable && explainPanel && !wasExplainPanelRefreshed) {
+                if (tmrExplainPanelRefresher)
+                    clearTimeout(tmrExplainPanelRefresher);
+                tmrExplainPanelRefresher = setTimeout(() => {
+                    getRegexExplanationImage(match[2]).then(result => {
+                        explainPanel.webview.html = result;
+                    })
+                }, 200);
+
+                wasExplainPanelRefreshed = true;
+            }
             return {
                 document: document,
                 regex: regex,
@@ -308,11 +370,11 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     function createRegex(pattern: string, flags: string) {
-            try {
-                return new RegExp(pattern, flags);
-            } catch (e) {
-                // discard
-            }
+        try {
+            return new RegExp(pattern, flags);
+        } catch (e) {
+            // discard
+        }
     }
 
     function findMatches(regexMatch: RegexMatch, document: vscode.TextDocument) {
@@ -330,5 +392,15 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }
         return matches;
+    }
+
+    async function getRegexExplanationImage(regex: string) {
+        let result: string = '<strong>Can\'t explain it</strong>';
+        try {
+            result = await vscode.commands.executeCommand(companionExtensionCommand, regex) ?? ".";
+        } catch (err) {
+            console.log(companionExtensionCommand + ": " + err);
+        }
+        return result;
     }
 }

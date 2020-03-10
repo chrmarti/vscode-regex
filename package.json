@@ -14,7 +14,7 @@
   },
   "icon": "images/icon.png",
   "engines": {
-    "vscode": "^1.18.0"
+    "vscode": "^1.39.0"
   },
   "categories": [
     "Other"
@@ -26,7 +26,7 @@
     "onLanguage:haxe",
     "onCommand:extension.toggleRegexPreview"
   ],
-  "main": "./out/src/extension",
+  "main": "./dist/extension",
   "contributes": {
     "configuration": {
       "type": "object",
@@ -34,9 +34,15 @@
       "properties": {
         "regex-previewer.enableCodeLens": {
           "scope": "resource",
-          "type":"boolean",
+          "type": "boolean",
           "default": true,
           "description": "Enables code lens for Regex Previewer"
+        },
+        "regex-previewer.enableExplainPanel": {
+          "scope": "application",
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enables [Regex Explain](https://marketplace.visualstudio.com/items?itemName=LouisWT.regexp-preview)'s panel to be shown in the bottom right (the extension requires to be installed and enabled globally)"
         }
       }
     },
@@ -54,18 +60,24 @@
       }
     ]
   },
+  "extensionPack": [
+    "louiswt.regexp-preview"
+  ],
   "scripts": {
-    "vscode:prepublish": "tsc -p ./",
-    "compile": "tsc -watch -p ./",
+    "vscode:prepublish": "webpack --mode production",
+    "webpack": "webpack --mode none",
+    "webpack-dev": "webpack --mode none --watch",
     "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "devDependencies": {
-    "@types/mocha": "^2.2.41",
-    "@types/node": "^6.0.71",
-    "mocha": "^2.5.3",
-    "typescript": "^2.3.2"
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.7.7",
+    "mocha": "^7.1.0",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.8.3",
+    "vscode": "^1.1.36",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11"
   },
-  "dependencies": {
-    "vscode": "^1.1.0"
-  }
+  "dependencies": {}
 }
