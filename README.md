@@ -8,6 +8,10 @@ Global and multiline options can be added for evaluation with a side-by-side doc
 
 ## Release Notes
 
+### 0.3.0
+
+- If you want you can install [Regexp Explain](https://marketplace.visualstudio.com/items?itemName=LouisWT.regexp-preview) and enable the `regex-previewer.enableExplainPanel` setting in order to have an "explain panel" at the bottom of the "preview panel"
+
 ### 0.2.0
 
 - Add PHP support (PR by [@ergunsh](https://github.com/ergunsh))

@@ -2,7 +2,7 @@
   "name": "regex",
   "displayName": "Regex Previewer",
   "description": "Regex matches previewer for JavaScript, TypeScript, PHP and Haxe in Visual Studio Code.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "chrmarti",
   "repository": {
     "type": "git",
@@ -41,7 +41,7 @@
         "regex-previewer.enableExplainPanel": {
           "scope": "application",
           "type": "boolean",
-          "default": true,
+          "default": false,
           "markdownDescription": "Enables [Regex Explain](https://marketplace.visualstudio.com/items?itemName=LouisWT.regexp-preview)'s panel to be shown in the bottom right (the extension requires to be installed and enabled globally)"
         }
       }
@@ -60,9 +60,6 @@
       }
     ]
   },
-  "extensionPack": [
-    "louiswt.regexp-preview"
-  ],
   "scripts": {
     "vscode:prepublish": "webpack --mode production",
     "webpack": "webpack --mode none",
