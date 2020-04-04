@@ -19,7 +19,7 @@ export function activate(context: vscode.ExtensionContext) {
     const matchesFilePath = context.asAbsolutePath('resources/sample.txt');
     const matchesFileContent = fs.readFileSync(matchesFilePath, 'utf8');
     const legacyMatchesFileUri = vscode.Uri.parse(`untitled:${path.sep}Regex Matches`);
-    const languages = !config.languages ? ['javascript', 'php', 'typescript', 'haxe'] : config.enableCodeLens;
+    const languages = !config.languages ? ['javascript', 'php', 'typescript', 'haxe'] : config.languages;
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
 
