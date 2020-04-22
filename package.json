@@ -21,6 +21,7 @@
   ],
   "activationEvents": [
     "onLanguage:javascript",
+    "onLanguage:javascriptvue",
     "onLanguage:typescript",
     "onLanguage:php",
     "onLanguage:haxe",
