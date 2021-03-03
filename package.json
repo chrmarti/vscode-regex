@@ -21,10 +21,10 @@
   ],
   "activationEvents": [
     "onLanguage:javascript",
-    "onLanguage:javascriptvue",
     "onLanguage:javascriptreact",
     "onLanguage:typescript",
     "onLanguage:typescriptreact",
+    "onLanguage:vue",
     "onLanguage:php",
     "onLanguage:haxe",
     "onCommand:extension.toggleRegexPreview"
