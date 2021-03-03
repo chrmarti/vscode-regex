@@ -21,7 +21,9 @@
   ],
   "activationEvents": [
     "onLanguage:javascript",
+    "onLanguage:javascriptreact",
     "onLanguage:typescript",
+    "onLanguage:typescriptreact",
     "onLanguage:php",
     "onLanguage:haxe",
     "onCommand:extension.toggleRegexPreview"
