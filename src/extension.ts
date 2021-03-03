@@ -3,9 +3,11 @@
  *--------------------------------------------------------*/
 'use strict';
 
-import * as fs from 'fs';
-import * as path from 'path';
 import * as vscode from 'vscode';
+
+declare type IntervalToken = object;
+declare function setInterval(fn: () => void, delay: number): IntervalToken;
+declare function clearInterval(token: IntervalToken): void;
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -15,9 +17,24 @@ export function activate(context: vscode.ExtensionContext) {
     const regexHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(100,100,100,.35)' });
     const matchHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(255,255,0,.35)' });
 
-    const matchesFilePath = context.asAbsolutePath('resources/sample.txt');
-    const matchesFileContent = fs.readFileSync(matchesFilePath, 'utf8');
-    const legacyMatchesFileUri = vscode.Uri.parse(`untitled:${path.sep}Regex Matches`);
+    const matchesFileContent = `Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+sed do eiusmod tempor incididunt ut labore et dolore magna
+aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit
+esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
+occaecat cupidatat non proident, sunt in culpa qui officia
+deserunt mollit anim id est laborum.
+
+abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
+0123456789 _+-.,!@#$%^&*();\/|<>"'
+12345 -98.7 3.141 .6180 9,000 +42
+555.123.4567	+1-(800)-555-2468
+foo@demo.net	bar.ba@test.co.uk
+www.demo.com	http://foo.co.uk/
+https://marketplace.visualstudio.com/items?itemName=chrmarti.regex
+https://github.com/chrmarti/vscode-regex
+`;
     const languages = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'php', 'haxe'];
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
@@ -93,31 +110,14 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     function openLoremIpsum(column: number, initialRegexMatch?: RegexMatch) {
-        return fileExists(legacyMatchesFileUri.fsPath).then(exists => {
-            return (exists ? vscode.workspace.openTextDocument(legacyMatchesFileUri.with({ scheme: 'file' })) :
-                vscode.workspace.openTextDocument({ language: 'text', content: matchesFileContent }))
+        return vscode.workspace.openTextDocument({ language: 'text', content: matchesFileContent })
             .then(document => {
                 return vscode.window.showTextDocument(document, column, true);
             }).then(editor => {
                 updateDecorators(findRegexEditor(), initialRegexMatch);
+            }).then(undefined, reason => {
+                vscode.window.showErrorMessage(reason);
             });
-        }).then(null, reason => {
-            vscode.window.showErrorMessage(reason);
-        });
-    }
-
-    function fileExists(path: string): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-            fs.lstat(path, (err, stats) => {
-                if (!err) {
-                    resolve(true);
-                } else if (err.code === 'ENOENT') {
-                    resolve(false);
-                } else {
-                    reject(err);
-                }
-            });
-        });
     }
 
     function updateDecorators(regexEditor?: vscode.TextEditor, initialRegexMatch?: RegexMatch) {

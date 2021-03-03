@@ -29,7 +29,7 @@
     "onLanguage:haxe",
     "onCommand:extension.toggleRegexPreview"
   ],
-  "main": "./out/src/extension",
+  "main": "./out/extension",
   "contributes": {
     "configuration": {
       "type": "object",
@@ -63,7 +63,6 @@
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/node": "^6.0.71",
     "@types/vscode": "^1.1.0",
     "typescript": "^4.2.2"
   }
