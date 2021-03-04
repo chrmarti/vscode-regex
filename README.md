@@ -8,6 +8,10 @@ Global and multiline options can be added for evaluation with a side-by-side doc
 
 ## Release Notes
 
+### 0.4.0
+
+- Also publish as web extension
+
 ### 0.3.0
 
 - Add React support (PR by [@galangel](https://github.com/galangel))
