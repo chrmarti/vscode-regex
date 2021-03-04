@@ -8,6 +8,12 @@ Global and multiline options can be added for evaluation with a side-by-side doc
 
 ## Release Notes
 
+### 0.3.0
+
+- Add React support (PR by [@galangel](https://github.com/galangel))
+- Add Vue support (PR by [@jombard](https://github.com/jombard))
+- Code cleanup
+
 ### 0.2.0
 
 - Add PHP support (PR by [@ergunsh](https://github.com/ergunsh))

@@ -2,7 +2,7 @@
   "name": "regex",
   "displayName": "Regex Previewer",
   "description": "Regex matches previewer for JavaScript, TypeScript, PHP and Haxe in Visual Studio Code.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "chrmarti",
   "repository": {
     "type": "git",
@@ -60,7 +60,8 @@
   "scripts": {
     "vscode:prepublish": "yarn run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package --yarn --githubBranch main"
   },
   "devDependencies": {
     "@types/vscode": "^1.1.0",
