@@ -30,6 +30,7 @@
     "onCommand:extension.toggleRegexPreview"
   ],
   "main": "./out/extension",
+  "browser": "./out/extension",
   "contributes": {
     "configuration": {
       "type": "object",
