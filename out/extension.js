@@ -9,6 +9,7 @@ function activate(context) {
     const regexRegex = /(^|\s|[()={},:?;])(\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))(\s|[()={},:?;]|$)/g;
     const phpRegexRegex = /(^|\s|[()={},:?;])['|"](\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))['|"](\s|[()={},:?;]|$)/g;
     const haxeRegexRegex = /(^|\s|[()={},:?;])(~\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimsu]*))(\s|[.()={},:?;]|$)/g;
+    const pyRegexRegex = /(^|\s|[()={},:?;])['|"](((?:\\\/|\[[^\]]*\]|[^/])+)([gimuy]*))['|"](\s|[()={},:?;]|$)/g;
     const regexHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(100,100,100,.35)' });
     const matchHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(255,255,0,.35)' });
     const matchesFileContent = `Lorem ipsum dolor sit amet, consectetur adipiscing elit,
@@ -29,7 +30,7 @@ www.demo.com	http://foo.co.uk/
 https://marketplace.visualstudio.com/items?itemName=chrmarti.regex
 https://github.com/chrmarti/vscode-regex
 `;
-    const languages = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'php', 'haxe'];
+    const languages = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'php', 'haxe', 'python'];
     const decorators = new Map();
     context.subscriptions.push(vscode.commands.registerCommand('extension.toggleRegexPreview', toggleRegexPreview));
     languages.forEach(language => {
@@ -243,6 +244,9 @@ https://github.com/chrmarti/vscode-regex
         }
         else if (languageId == 'php') {
             return phpRegexRegex;
+        }
+        else if (languageId == 'python') {
+            return pyRegexRegex;
         }
         return regexRegex;
     }
