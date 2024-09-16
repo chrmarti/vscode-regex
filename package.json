@@ -2,7 +2,7 @@
   "name": "regex",
   "displayName": "Regex Previewer",
   "description": "Regex matches previewer for JavaScript, TypeScript, PHP and Haxe in Visual Studio Code.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "publisher": "chrmarti",
   "repository": {
     "type": "git",
@@ -12,12 +12,20 @@
   "bugs": {
     "url": "https://github.com/chrmarti/vscode-regex/issues"
   },
+  "keywords": [
+    "regex",
+    "regular expression",
+    "regexp",
+    "test"
+  ],
   "icon": "images/icon.png",
   "engines": {
-    "vscode": "^1.18.0"
+    "vscode": "^1.92.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Chat",
+    "AI"
   ],
   "activationEvents": [
     "onLanguage:javascript",
@@ -26,8 +34,7 @@
     "onLanguage:typescriptreact",
     "onLanguage:vue",
     "onLanguage:php",
-    "onLanguage:haxe",
-    "onCommand:extension.toggleRegexPreview"
+    "onLanguage:haxe"
   ],
   "main": "./out/extension",
   "browser": "./out/extension",
@@ -56,17 +63,69 @@
         "key": "ctrl+alt+m",
         "mac": "cmd+alt+m"
       }
+    ],
+    "chatParticipants": [
+      {
+        "id": "regex.chatParticipant",
+        "fullName": "Regex",
+        "name": "regex",
+        "description": "Talk to me about regexes!",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "new",
+            "description": "Create a new regex from a description",
+            "disambiguation": [
+              {
+                "category": "regex_new",
+                "description": "The user wants to create a new regex from a description.",
+                "examples": [
+                  "Create a new regex matching something",
+                  "New regex matching something",
+                  "Build a regex for something"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "new-from",
+            "description": "Create a new regex from a sample",
+            "disambiguation": [
+              {
+                "category": "regex_new-from",
+                "description": "The user wants to create a new regex from a sample.",
+                "examples": [
+                  "Create a new regex that matches this",
+                  "New regex from sample",
+                  "Build a regex for this"
+                ]
+              }
+            ]
+          }
+        ],
+        "disambiguation": [
+          {
+            "category": "regex",
+            "description": "The user wants to understand a regex.",
+            "examples": [
+              "Explain this regex",
+              "What does this regex do?",
+              "How does this regex work?"
+            ]
+          }
+        ]
+      }
     ]
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "vsce package --yarn --githubBranch main --web",
-    "publish": "vsce publish --yarn --githubBranch main --web"
+    "package": "vsce package",
+    "publish": "vsce publish"
   },
   "devDependencies": {
-    "@types/vscode": "^1.1.0",
-    "typescript": "^4.2.2"
+    "@types/vscode": "^1.92.0",
+    "typescript": "^5.6.2"
   }
 }

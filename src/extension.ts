@@ -1,15 +1,18 @@
-/*---------------------------------------------------------
- * Copyright (C) Microsoft Corporation. All rights reserved.
- *--------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 'use strict';
 
 import * as vscode from 'vscode';
+import { registerChatParticipant } from './chat';
 
 declare type IntervalToken = object;
 declare function setInterval(fn: () => void, delay: number): IntervalToken;
 declare function clearInterval(token: IntervalToken): void;
 
 export function activate(context: vscode.ExtensionContext) {
+    registerChatParticipant(context);
 
     const regexRegex = /(^|\s|[()={},:?;])(\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))(\s|[()={},:?;]|$)/g;
     const phpRegexRegex = /(^|\s|[()={},:?;])['|"](\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))['|"](\s|[()={},:?;]|$)/g;

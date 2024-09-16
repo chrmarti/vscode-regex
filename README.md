@@ -8,6 +8,10 @@ Global and multiline options can be added for evaluation with a side-by-side doc
 
 ## Release Notes
 
+### 0.5.0
+
+- Add chat participant
+
 ### 0.4.0
 
 - Also publish as web extension
