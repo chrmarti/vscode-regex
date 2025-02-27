@@ -14,6 +14,9 @@ declare function clearInterval(token: IntervalToken): void;
 export function activate(context: vscode.ExtensionContext) {
     registerChatParticipant(context);
 
+    // lines that start with {/* or end with */} are comments in JSX
+    const isJSXCommentRegex = /(^\s*{\/\*)|(\*\/}$)/;
+
     const regexRegex = /(^|\s|[()={},:?;])(\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))(\s|[()={},:?;]|$)/g;
     const phpRegexRegex = /(^|\s|[()={},:?;])['|"](\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))['|"](\s|[()={},:?;]|$)/g;
     const haxeRegexRegex = /(^|\s|[()={},:?;])(~\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimsu]*))(\s|[.()={},:?;]|$)/g;
@@ -280,6 +283,9 @@ https://github.com/chrmarti/vscode-regex
             let regex = getRegexRegex(document.languageId);
             regex.lastIndex = 0;
             const text = line.text.substr(0, 1000);
+            if (isJSXComment(text)) {
+                continue;
+            }
             while ((match = regex.exec(text))) {
                 const result = createRegexMatch(document, i, match);
                 if (result) {
@@ -333,5 +339,10 @@ https://github.com/chrmarti/vscode-regex
             }
         }
         return matches;
+    }
+
+    function isJSXComment(line: string) {
+        // TODO - something to check settings if we want to support checking for JSX comments
+        return isJSXCommentRegex.exec(line) !== null;
     }
 }
