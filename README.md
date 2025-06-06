@@ -1,6 +1,13 @@
+
 ## Features
 
+
 Shows the current regular expression's matches in a side-by-side document. This can be turned on/off with `Ctrl+Alt+M` (`⌥⌘M`).
+
+### Python Support
+
+Regex Previewer now supports Python files! You can preview regex matches in Python source code, including raw string patterns (e.g., `r"pattern"`).
+
 
 Global and multiline options can be added for evaluation with a side-by-side document through a status bar entry. This can be useful when the side-by-side document has multiple examples to match.
 
@@ -8,8 +15,12 @@ Global and multiline options can be added for evaluation with a side-by-side doc
 
 ## Release Notes
 
-### 0.5.0
 
+### 0.6.0
+
+- Add Python support
+
+### 0.5.0
 - Add chat participant
 
 ### 0.4.0

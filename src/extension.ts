@@ -38,7 +38,7 @@ www.demo.com	http://foo.co.uk/
 https://marketplace.visualstudio.com/items?itemName=chrmarti.regex
 https://github.com/chrmarti/vscode-regex
 `;
-    const languages = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'php', 'haxe'];
+    const languages = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'php', 'haxe', 'python'];
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
 
@@ -295,6 +295,10 @@ https://github.com/chrmarti/vscode-regex
             return haxeRegexRegex;
         } else if (languageId == 'php') {
             return phpRegexRegex;
+        } else if (languageId == 'python') {
+            // Python regex: r"pattern" or r'pattern' or plain /pattern/
+            // We'll match r"..." and r'...'
+            return /(^|\s|[()={},:?;])r(["'])(.+?)\2([a-zA-Z]*)/g;
         }
         return regexRegex;
     }
