@@ -17,6 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
     const regexRegex = /(^|\s|[()={},:?;])(\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuyd]*))(\s|[()={},:?;]|$)/g;
     const phpRegexRegex = /(^|\s|[()={},:?;])['|"](\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))['|"](\s|[()={},:?;]|$)/g;
     const haxeRegexRegex = /(^|\s|[()={},:?;])(~\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimsu]*))(\s|[.()={},:?;]|$)/g;
+    const javaRegexRegex = /(^|\s|[()={},:?;]|[a-zA-Z_$][a-zA-Z0-9_$]*\.)(Pattern\.compile\s*\(\s*"([^"\\]*(\\.[^"\\]*)*)"\s*\)|(?:matches|replaceAll|replaceFirst|split)\s*\(\s*"([^"\\]*(\\.[^"\\]*)*)"\s*[,)])(\s|[()={},:?;]|$)/g;
     const regexHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(100,100,100,.35)' });
     const matchHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(255,255,0,.35)' });
 
@@ -38,7 +39,7 @@ www.demo.com	http://foo.co.uk/
 https://marketplace.visualstudio.com/items?itemName=chrmarti.regex
 https://github.com/chrmarti/vscode-regex
 `;
-    const languages = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'php', 'haxe'];
+    const languages = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'php', 'haxe', 'java'];
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
 
@@ -295,12 +296,27 @@ https://github.com/chrmarti/vscode-regex
             return haxeRegexRegex;
         } else if (languageId == 'php') {
             return phpRegexRegex;
+        } else if (languageId == 'java') {
+            return javaRegexRegex;
         }
         return regexRegex;
     }
 
     function createRegexMatch(document: vscode.TextDocument, line: number, match: RegExpExecArray) {
-        const regex = createRegex(match[3], match[4]);
+        let pattern: string;
+        let flags: string;
+        
+        if (document.languageId === 'java') {
+            // For Java, pattern is in match[3] or match[5], flags are empty
+            pattern = match[3] || match[5];
+            flags = '';
+        } else {
+            // For other languages, use the standard format
+            pattern = match[3];
+            flags = match[4];
+        }
+        
+        const regex = createRegex(pattern, flags);
         if (regex) {
             return {
                 document: document,

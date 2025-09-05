@@ -11,6 +11,7 @@ Global and multiline options can be added for evaluation with a side-by-side doc
 ### 0.6.0
 
 - Add support for `d` flag in TypeScript/JavaScript (PR by [@wszgrcy](https://github.com/wszgrcy))
+- Add Java support
 
 ### 0.5.0
 
