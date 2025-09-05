@@ -17,6 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
     const regexRegex = /(^|\s|[()={},:?;])(\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuyd]*))(\s|[()={},:?;]|$)/g;
     const phpRegexRegex = /(^|\s|[()={},:?;])['|"](\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))['|"](\s|[()={},:?;]|$)/g;
     const haxeRegexRegex = /(^|\s|[()={},:?;])(~\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimsu]*))(\s|[.()={},:?;]|$)/g;
+    const javaRegexRegex = /(^|\s|[()={},:?;]|\.)((?:Pattern\.compile\s*\(\s*|\.(?:matches|replaceAll|replaceFirst|split)\s*\(\s*)"([^"\\]*(\\.[^"\\]*)*)"(?:\s*\)|s*,))()(\s|[()={},:?;]|$)/g;
     const regexHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(100,100,100,.35)' });
     const matchHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(255,255,0,.35)' });
 
@@ -38,7 +39,7 @@ www.demo.com	http://foo.co.uk/
 https://marketplace.visualstudio.com/items?itemName=chrmarti.regex
 https://github.com/chrmarti/vscode-regex
 `;
-    const languages = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'php', 'haxe'];
+    const languages = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'php', 'haxe', 'java'];
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
 
@@ -295,6 +296,8 @@ https://github.com/chrmarti/vscode-regex
             return haxeRegexRegex;
         } else if (languageId == 'php') {
             return phpRegexRegex;
+        } else if (languageId == 'java') {
+            return javaRegexRegex;
         }
         return regexRegex;
     }
