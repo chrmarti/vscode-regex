@@ -8,6 +8,10 @@ Global and multiline options can be added for evaluation with a side-by-side doc
 
 ## Release Notes
 
+### 0.6.1
+
+- Add Go support
+
 ### 0.6.0
 
 - Add support for `d` flag in TypeScript/JavaScript (PR by [@wszgrcy](https://github.com/wszgrcy))
