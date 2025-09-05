@@ -17,6 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
     const regexRegex = /(^|\s|[()={},:?;])(\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuyd]*))(\s|[()={},:?;]|$)/g;
     const phpRegexRegex = /(^|\s|[()={},:?;])['|"](\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimuy]*))['|"](\s|[()={},:?;]|$)/g;
     const haxeRegexRegex = /(^|\s|[()={},:?;])(~\/((?:\\\/|\[[^\]]*\]|[^/])+)\/([gimsu]*))(\s|[.()={},:?;]|$)/g;
+    const goRegexRegex = /regexp\.(MustCompile|Compile|CompilePOSIX)\s*\(\s*(['"`])((?:\\.|[^\\])*?)\2\s*\)/g;
     const regexHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(100,100,100,.35)' });
     const matchHighlight = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(255,255,0,.35)' });
 
@@ -38,7 +39,7 @@ www.demo.com	http://foo.co.uk/
 https://marketplace.visualstudio.com/items?itemName=chrmarti.regex
 https://github.com/chrmarti/vscode-regex
 `;
-    const languages = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'php', 'haxe'];
+    const languages = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'php', 'haxe', 'go'];
 
     const decorators = new Map<vscode.TextEditor, RegexMatchDecorator>();
 
@@ -295,17 +296,40 @@ https://github.com/chrmarti/vscode-regex
             return haxeRegexRegex;
         } else if (languageId == 'php') {
             return phpRegexRegex;
+        } else if (languageId == 'go') {
+            return goRegexRegex;
         }
         return regexRegex;
     }
 
     function createRegexMatch(document: vscode.TextDocument, line: number, match: RegExpExecArray) {
-        const regex = createRegex(match[3], match[4]);
+        let pattern: string;
+        let flags: string;
+        let rangeStart: number;
+        let rangeLength: number;
+
+        if (document.languageId === 'go') {
+            // Go regex: regexp.MustCompile("pattern")
+            // Groups: [full_match, function_name, quote_char, pattern]
+            pattern = match[3];
+            flags = ''; // Go doesn't use inline flags
+            rangeStart = match.index;
+            rangeLength = match[0].length;
+        } else {
+            // Other languages: /pattern/flags or similar
+            // Groups: [full_match, prefix, full_regex, pattern, flags, suffix]
+            pattern = match[3];
+            flags = match[4] || '';
+            rangeStart = match.index + match[1].length;
+            rangeLength = match[2].length;
+        }
+
+        const regex = createRegex(pattern, flags);
         if (regex) {
             return {
                 document: document,
                 regex: regex,
-                range: new vscode.Range(line, match.index + match[1].length, line, match.index + match[1].length + match[2].length)
+                range: new vscode.Range(line, rangeStart, line, rangeStart + rangeLength)
             };
         }
     }
